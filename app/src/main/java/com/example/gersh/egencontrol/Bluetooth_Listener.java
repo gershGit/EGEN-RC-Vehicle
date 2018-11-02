@@ -61,6 +61,6 @@ public class Bluetooth_Listener extends Thread {
     }
 
     private void handleMessage(String message){
-        Log.i("BT", message);
+        Log.i("BT", "\n\n------------ " + message + " ------------\n\n");
     }
 }

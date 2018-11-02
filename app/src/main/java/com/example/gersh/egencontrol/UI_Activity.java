@@ -21,6 +21,7 @@ public class UI_Activity extends AppCompatActivity {
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private Bluetooth_Listener bluetooth_listener;
+    private Bluetooth_Sender bluetooth_sender;
     private BluetoothAdapter myBluetooth = null;
     private BluetoothSocket btSocket = null;
     private boolean bluetoothConnected = false;
@@ -243,6 +244,7 @@ public class UI_Activity extends AppCompatActivity {
             btSocket.connect();
             bluetoothConnected = true;
             bluetooth_listener = new Bluetooth_Listener(btSocket);
+            bluetooth_sender = new Bluetooth_Sender(btSocket);
             bluetooth_listener.start();
             return true;
         } catch (Exception e){
@@ -252,18 +254,17 @@ public class UI_Activity extends AppCompatActivity {
     }
 
     private void sendMotor(String name, float strength){
-        int strength_int = (int) (strength*10);
-        sendBT("M"+name+strength_int+">");
+        int strength_int = (int) (strength*100);
+        String int_formatted = String.format("%03d", strength_int);
+        if (strength_int>=0){
+            sendBT("M" + name +"+" + int_formatted + ">");
+        } else {
+            sendBT("M" + name + int_formatted + ">");
+        }
     }
 
     private void sendBT(String message){
-        Log.d(TAG, "Sending: " + message);
-        if (btSocket!=null){
-            try {
-                btSocket.getOutputStream().write(message.getBytes());
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        }
+        bluetooth_sender.setMessage(message);
+        bluetooth_sender.run();
     }
 }
