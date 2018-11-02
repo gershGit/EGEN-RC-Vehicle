@@ -116,7 +116,7 @@ public class UI_Activity extends AppCompatActivity {
 
     private void sendAndDisplay() {
         Log.d(TAG, "Time since last send: " + timeSinceLastSend);
-        if (SystemClock.uptimeMillis()-timeSinceLastSend > 30) {
+        if (SystemClock.uptimeMillis()-timeSinceLastSend > 150) {
             timeSinceLastSend = SystemClock.uptimeMillis();
             if (MOTOR_STATE_CHANGE) {
                 float rightTurnMultiplier;
@@ -216,8 +216,9 @@ public class UI_Activity extends AppCompatActivity {
                 if (bt.getName().contains("HC-05")) {
                     found = true;
                     boolean success = connectBluetooth(bt.getAddress(), bt.getName());
-                    Toast.makeText(getApplicationContext(), "Connected to Arduino", Toast.LENGTH_SHORT).show();
-                    if (!success) {
+                    if(success) {
+                        Toast.makeText(getApplicationContext(), "Connected to Arduino", Toast.LENGTH_SHORT).show();
+                    } else {
                         Toast.makeText(getApplicationContext(), "Arduino found, Connection failed", Toast.LENGTH_LONG).show();
                     }
                 }
