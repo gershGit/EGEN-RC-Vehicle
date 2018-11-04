@@ -32,6 +32,7 @@ public class UI_Activity extends AppCompatActivity {
     private DecimalFormat decimalFormat = new DecimalFormat("+#;-#");
     int global_power, global_turn;
     int leftMotor = 0, rightMotor = 0;
+    boolean braked = false;
     int temperature;
 
     TextView powerText, turnText;
@@ -176,6 +177,8 @@ public class UI_Activity extends AppCompatActivity {
     private void brakeVehicle() {
         global_turn = 0;
         global_power = 0;
+        LED_STATE = true;
+        braked = true;
     }
 
     private void decrementTurn() {
@@ -309,5 +312,10 @@ public class UI_Activity extends AppCompatActivity {
         } else {
             sendBT("-");
         }
+    }
+
+    public void cycleGUI(View view){
+        Intent intent = new Intent(this, Motor_Direct.class);
+        startActivity(intent);
     }
 }

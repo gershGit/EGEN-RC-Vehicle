@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">EGEN Control</string>
+    <string name="button_to_brake">button to brake</string>
 </resources>
