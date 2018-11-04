@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DecimalFormat;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,9 +26,12 @@ public class UI_Activity extends AppCompatActivity {
     private BluetoothAdapter myBluetooth = null;
     private BluetoothSocket btSocket = null;
     private boolean bluetoothConnected = false;
+    private boolean safeMode = false;
 
     public String TAG = "UI_ACTIVITY";
+    private DecimalFormat decimalFormat = new DecimalFormat("+#;-#");
     int global_power, global_turn;
+    int leftMotor = 0, rightMotor = 0;
     int temperature;
 
     TextView powerText, turnText;
@@ -79,10 +83,16 @@ public class UI_Activity extends AppCompatActivity {
                 MOTOR_STATE_CHANGE = true;
                 if (event.getY(i) < 300 && event.getY(i) > 250){
                     if (action == MotionEvent.ACTION_UP) {
+                        if (safeMode){
+                            sendBT("F");
+                        }
                         incrementSpeed();
                     }
                 } else if (event.getY(i) > 800 && event.getY(i) < 875) {
                     if (action == MotionEvent.ACTION_UP) {
+                        if (safeMode){
+                            sendBT("G");
+                        }
                         decrementSpeed();
                     }
                 } else if (event.getY(i) > 250 && event.getY(i) < 875) {
@@ -92,10 +102,16 @@ public class UI_Activity extends AppCompatActivity {
                 MOTOR_STATE_CHANGE = true;
                 if (event.getX(i) < 850 && event.getX(i) > 750){
                     if (event.getY(i) > 400 && event.getY(i) < 650 && action == MotionEvent.ACTION_UP) {
+                        if (safeMode){
+                            sendBT(">");
+                        }
                         incrementTurn();
                     }
                 } else if (event.getX(i) > 200 && event.getX(i) < 300) {
                     if (event.getY(i) > 400 && event.getY(i) < 650 && action == MotionEvent.ACTION_UP) {
+                        if (safeMode){
+                            sendBT("<");
+                        }
                         decrementTurn();
                     }
                 } else if (event.getX(i) > 300 && event.getX(i) < 750 && event.getY(i) > 400 && event.getY(i) < 650) {
@@ -103,47 +119,51 @@ public class UI_Activity extends AppCompatActivity {
                 }
             } else if (event.getX(i) < 1150 && event.getX(i)> 775 && event.getY(i) > 875 && event.getY(i) < 1000){
                 MOTOR_STATE_CHANGE = true;
+                if (safeMode && action == MotionEvent.ACTION_UP){
+                    sendBT("B");
+                }
                 brakeVehicle();
-            } else if (event.getX(i) < 1125 && event.getX(i) > 760 && event.getY(i) > 110 && event.getY(i) < 210){
+            } else if (event.getX(i) < 1125 && event.getX(i) > 760 && event.getY(i) > 110 && event.getY(i) < 210 && action==MotionEvent.ACTION_UP){
                 LED_STATE = !LED_STATE;
                 LED_STATE_CHANGE = true;
+                if (safeMode && action == MotionEvent.ACTION_UP) {
+                    if (LED_STATE ) {
+                        sendBT("O");
+                    } else {
+                        sendBT("P");
+                    }
+                }
             }
         }
-
-        sendAndDisplay();
+        if (!safeMode) {
+            sendAndDisplay();
+        }
 
         return super.onTouchEvent(event);
     }
 
     private void sendAndDisplay() {
-        Log.d(TAG, "Time since last send: " + timeSinceLastSend);
-        if (SystemClock.uptimeMillis()-timeSinceLastSend > 150) {
+        //Log.d(TAG, "Time since last send: " + (SystemClock.uptimeMillis() - timeSinceLastSend));
+        if (SystemClock.uptimeMillis()-timeSinceLastSend > 200) {
             timeSinceLastSend = SystemClock.uptimeMillis();
             if (MOTOR_STATE_CHANGE) {
                 float rightTurnMultiplier;
                 if (global_turn <= 0) {
                     rightTurnMultiplier = 100.0f;
                 } else {
-                    rightTurnMultiplier = -global_turn;
+                    rightTurnMultiplier = (-global_turn*2) + 100;
                 }
-                float rightMotor = (global_power / 100.0f) * (rightTurnMultiplier / 100.0f);
-                sendMotor("r", rightMotor);
+                rightMotor = (int)((global_power / 100.0f) * (rightTurnMultiplier / 100.0f) * 9);
 
                 float leftTurnMultiplier;
                 if (global_turn >= 0) {
                     leftTurnMultiplier = 100.0f;
                 } else {
-                    leftTurnMultiplier = global_turn;
+                    leftTurnMultiplier = global_turn*2 + 100;
                 }
-                float leftMotor = (global_power / 100.0f) * (leftTurnMultiplier / 100.0f);
-                sendMotor("l", leftMotor);
+                leftMotor = (int) ((global_power / 100.0f) * (leftTurnMultiplier / 100.0f) * 9);
             }
-
-            if (LED_STATE && LED_STATE_CHANGE) {
-                sendBT("L1>");
-            } else if (LED_STATE_CHANGE) {
-                sendBT("L0>");
-            }
+            sendAll(leftMotor, rightMotor, LED_STATE);
         }
 
         LED_STATE_CHANGE = false;
@@ -175,7 +195,7 @@ public class UI_Activity extends AppCompatActivity {
     private void decrementSpeed() {
         global_power-=2;
         if (global_power<-100){
-            global_power = 100;
+            global_power = -100;
         }
     }
 
@@ -236,16 +256,16 @@ public class UI_Activity extends AppCompatActivity {
         temperature = temp;
     }
 
-    private boolean connectBluetooth(String address, String name){
+    private boolean connectBluetooth(String address, String name)                           {
         try {
             BluetoothDevice dispositivo = myBluetooth.getRemoteDevice(address);
             btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);
             BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
             btSocket.connect();
             bluetoothConnected = true;
-            bluetooth_listener = new Bluetooth_Listener(btSocket);
+            //bluetooth_listener = new Bluetooth_Listener(btSocket);
             bluetooth_sender = new Bluetooth_Sender(btSocket);
-            bluetooth_listener.start();
+            //bluetooth_listener.start();
             return true;
         } catch (Exception e){
             e.printStackTrace();
@@ -263,8 +283,31 @@ public class UI_Activity extends AppCompatActivity {
         }
     }
 
+    private void sendAll(int leftStrength, int rightStrength, boolean led_state){
+        String message = decimalFormat.format(leftStrength) + "" + decimalFormat.format(rightStrength);
+        if(led_state){
+            message+="1>";
+        } else {
+            message+="0>";
+        }
+        sendBT(message);
+    }
+
     private void sendBT(String message){
-        bluetooth_sender.setMessage(message);
-        bluetooth_sender.run();
+        if (bluetooth_sender != null) {
+            bluetooth_sender.setMessage(message);
+            bluetooth_sender.run();
+        } else {
+            Toast.makeText(getApplicationContext(), "No Bluetooth Connection", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void switchSafeMode(View view){
+        safeMode = !safeMode;
+        if (safeMode){
+            sendBT("_");
+        } else {
+            sendBT("-");
+        }
     }
 }
