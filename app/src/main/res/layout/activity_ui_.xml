@@ -4,63 +4,174 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#1B202C"
     tools:context=".UI_Activity">
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@mipmap/rcbackground" />
 
     <TextView
         android:id="@+id/powerText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="150dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="24dp"
         android:text="00%"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="@+id/speedImage"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintStart_toStartOf="@+id/speedImage" />
 
     <TextView
         android:id="@+id/turnText"
         android:layout_width="wrap_content"
-        android:layout_height="15dp"
-        android:layout_marginEnd="275dp"
-        android:layout_marginBottom="32dp"
-        android:text="00%"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/powerText" />
-
-    <Button
-        android:id="@+id/bluetoothButton"
-        android:layout_width="48dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="00%"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/turnImage"
+        app:layout_constraintStart_toStartOf="@+id/turnImage" />
+
+    <ImageButton
+        android:id="@+id/bluetoothButton"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@null"
         android:onClick="attemptBluetooth"
-        android:text="B"
+        android:src="@drawable/bluetooth_selectable"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/safeButton"
-        android:layout_width="53dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="250dp"
+    <ImageButton
+        android:id="@+id/safeButtonNew"
+        android:layout_width="35dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@null"
         android:onClick="switchSafeMode"
-        android:text="S"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bluetoothButton" />
+        android:src="@mipmap/safe_off"
+        app:layout_constraintStart_toEndOf="@+id/bluetoothButton"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/Switch_Style"
-        android:layout_width="57dp"
-        android:layout_height="38dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+    <ImageButton
+        android:id="@+id/gui_button"
+        android:layout_width="35dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:background="@null"
         android:onClick="cycleGUI"
-        android:text="GUI"
+        android:src="@mipmap/gui_button"
+        app:layout_constraintStart_toEndOf="@+id/safeButtonNew"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/brake_button"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:onClick="brakeVehicle"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@mipmap/brake_button" />
+
+    <ImageView
+        android:id="@+id/headlights_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:onClick="toggleLED"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@mipmap/headlights_normal" />
+
+    <ImageView
+        android:id="@+id/turnImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.497"
+        app:srcCompat="@drawable/turn_wheel" />
+
+    <ImageView
+        android:id="@+id/speedImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="80dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/speed_wheel" />
+
+    <ImageButton
+        android:id="@+id/speed_increase_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@null"
+        android:onClick="incrementSpeed"
+        app:layout_constraintBottom_toTopOf="@+id/speedImage"
+        app:layout_constraintEnd_toEndOf="@+id/speedImage"
+        app:layout_constraintStart_toStartOf="@+id/speedImage"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/speed_increase_style" />
+
+    <ImageButton
+        android:id="@+id/turn_increase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:background="@null"
+        android:onClick="incrementTurn"
+        app:layout_constraintBottom_toBottomOf="@+id/turnImage"
+        app:layout_constraintStart_toEndOf="@+id/turnImage"
+        app:layout_constraintTop_toTopOf="@+id/turnImage"
+        app:layout_constraintVertical_bias="0.504"
+        app:srcCompat="@drawable/turn_increase_style" />
+
+    <ImageButton
+        android:id="@+id/turn_decrease"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:background="@null"
+        android:onClick="decrementTurn"
+        app:layout_constraintBottom_toBottomOf="@+id/turnImage"
+        app:layout_constraintEnd_toStartOf="@+id/turnImage"
+        app:layout_constraintTop_toTopOf="@+id/turnImage"
+        app:layout_constraintVertical_bias="0.504"
+        app:srcCompat="@drawable/turn_decrease_style" />
+
+    <ImageButton
+        android:id="@+id/speed_decrease_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@null"
+        android:onClick="decrementSpeed"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/speedImage"
+        app:layout_constraintStart_toStartOf="@+id/speedImage"
+        app:layout_constraintTop_toBottomOf="@+id/speedImage"
+        app:layout_constraintVertical_bias="0.054"
+        app:srcCompat="@drawable/speed_decrease_style" />
+
 </android.support.constraint.ConstraintLayout>

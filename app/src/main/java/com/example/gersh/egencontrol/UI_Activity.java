@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,24 +22,20 @@ import java.util.UUID;
 public class UI_Activity extends AppCompatActivity {
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
-    private Bluetooth_Listener bluetooth_listener;
     private Bluetooth_Sender bluetooth_sender;
     private BluetoothAdapter myBluetooth = null;
     private BluetoothSocket btSocket = null;
     private boolean bluetoothConnected = false;
     private boolean safeMode = false;
 
-    public String TAG = "UI_ACTIVITY";
     private DecimalFormat decimalFormat = new DecimalFormat("+#;-#");
     int global_power, global_turn;
     int leftMotor = 0, rightMotor = 0;
     boolean braked = false;
-    int temperature;
 
     TextView powerText, turnText;
+    ImageView brakeView, safeView, bluetoothView, turnView, speedView;
     boolean LED_STATE = false;
-    boolean LED_STATE_CHANGE = false;
-    boolean MOTOR_STATE_CHANGE = false;
 
     long timeSinceLastSend;
 
@@ -48,6 +45,11 @@ public class UI_Activity extends AppCompatActivity {
         setContentView(R.layout.activity_ui_);
         powerText = findViewById(R.id.powerText);
         turnText = findViewById(R.id.turnText);
+        brakeView = findViewById(R.id.brake_button);
+        bluetoothView = findViewById(R.id.bluetoothButton);
+        safeView = findViewById(R.id.safeButtonNew);
+        turnView = findViewById(R.id.turnImage);
+        speedView = findViewById(R.id.speedImage);
 
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
         if  (myBluetooth == null){
@@ -58,6 +60,7 @@ public class UI_Activity extends AppCompatActivity {
                 startActivityForResult(turnBluetoothOn,1);
             }
         }
+
         timeSinceLastSend = SystemClock.uptimeMillis();
     }
 
@@ -75,137 +78,142 @@ public class UI_Activity extends AppCompatActivity {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        int actionIndex = event.getActionIndex();
         int action = event.getActionMasked();
         int touchCount = event.getPointerCount();
         //Log.i(TAG, "Pos: " + event.getX() + ", " + event.getY());
+        boolean speedTouched = false;
+        boolean turnTouched = false;
+
 
         for (int i=0; i<touchCount; i++){
-            if (event.getX(i) > 1100 && event.getX(i) < 1600){
-                MOTOR_STATE_CHANGE = true;
-                if (event.getY(i) < 300 && event.getY(i) > 250){
-                    if (action == MotionEvent.ACTION_UP) {
-                        if (safeMode){
-                            sendBT("F");
-                        }
-                        incrementSpeed();
-                    }
-                } else if (event.getY(i) > 800 && event.getY(i) < 875) {
-                    if (action == MotionEvent.ACTION_UP) {
-                        if (safeMode){
-                            sendBT("G");
-                        }
-                        decrementSpeed();
-                    }
-                } else if (event.getY(i) > 250 && event.getY(i) < 875) {
-                    controlSpeed(event.getY(i));
+            if (event.getX(i) > 1100 && event.getX(i) < 1600 && event.getY(i) > 250 && event.getY(i) < 875){
+                speedTouched = true;
+                if (actionIndex==i && action == MotionEvent.ACTION_UP){
+                    speedView.setImageResource(R.mipmap.speed_normal);
+                } else {
+                    speedView.setImageResource(R.mipmap.speed_pressed);
                 }
-            } else if (event.getX(i) > 225 && event.getX(i) < 825){
-                MOTOR_STATE_CHANGE = true;
-                if (event.getX(i) < 850 && event.getX(i) > 750){
-                    if (event.getY(i) > 400 && event.getY(i) < 650 && action == MotionEvent.ACTION_UP) {
-                        if (safeMode){
-                            sendBT(">");
-                        }
-                        incrementTurn();
-                    }
-                } else if (event.getX(i) > 200 && event.getX(i) < 300) {
-                    if (event.getY(i) > 400 && event.getY(i) < 650 && action == MotionEvent.ACTION_UP) {
-                        if (safeMode){
-                            sendBT("<");
-                        }
-                        decrementTurn();
-                    }
-                } else if (event.getX(i) > 300 && event.getX(i) < 750 && event.getY(i) > 400 && event.getY(i) < 650) {
-                    controlTurn(event.getX(i));
+                if (!turnTouched) {
+                    turnView.setImageResource(R.mipmap.turning_normal);
                 }
-            } else if (event.getX(i) < 1150 && event.getX(i)> 775 && event.getY(i) > 875 && event.getY(i) < 1000){
-                MOTOR_STATE_CHANGE = true;
-                if (safeMode && action == MotionEvent.ACTION_UP){
-                    sendBT("B");
+                controlSpeed(event.getY(i));
+            } else if (event.getX(i) > 300 && event.getX(i) < 750 && event.getY(i) > 400 && event.getY(i) < 650) {
+                turnTouched = true;
+                if (actionIndex==i && action == MotionEvent.ACTION_UP){
+                    turnView.setImageResource(R.mipmap.turning_normal);
+                } else {
+                    turnView.setImageResource(R.mipmap.turning_pressed);
                 }
-                brakeVehicle();
-            } else if (event.getX(i) < 1125 && event.getX(i) > 760 && event.getY(i) > 110 && event.getY(i) < 210 && action==MotionEvent.ACTION_UP){
-                LED_STATE = !LED_STATE;
-                LED_STATE_CHANGE = true;
-                if (safeMode && action == MotionEvent.ACTION_UP) {
-                    if (LED_STATE ) {
-                        sendBT("O");
-                    } else {
-                        sendBT("P");
-                    }
+                if (!speedTouched){
+                    speedView.setImageResource(R.mipmap.speed_normal);
+                }
+                controlTurn(event.getX(i));
+            } else {
+                if (!speedTouched) {
+                    speedView.setImageResource(R.mipmap.speed_normal);
+                }
+                if (!turnTouched) {
+                    turnView.setImageResource(R.mipmap.turning_normal);
                 }
             }
         }
         if (!safeMode) {
-            sendAndDisplay();
+            sendAndDisplay(false);
         }
-
         return super.onTouchEvent(event);
     }
 
-    private void sendAndDisplay() {
-        //Log.d(TAG, "Time since last send: " + (SystemClock.uptimeMillis() - timeSinceLastSend));
-        if (SystemClock.uptimeMillis()-timeSinceLastSend > 200) {
-            timeSinceLastSend = SystemClock.uptimeMillis();
-            if (MOTOR_STATE_CHANGE) {
-                float rightTurnMultiplier;
-                if (global_turn <= 0) {
-                    rightTurnMultiplier = 100.0f;
-                } else {
-                    rightTurnMultiplier = (-global_turn*2) + 100;
-                }
-                rightMotor = (int)((global_power / 100.0f) * (rightTurnMultiplier / 100.0f) * 9);
+    private void sendAndDisplay(boolean force) {
+        //Log.d("UI", "Time since last send: " + (SystemClock.uptimeMillis() - timeSinceLastSend));
 
-                float leftTurnMultiplier;
-                if (global_turn >= 0) {
-                    leftTurnMultiplier = 100.0f;
-                } else {
-                    leftTurnMultiplier = global_turn*2 + 100;
-                }
-                leftMotor = (int) ((global_power / 100.0f) * (leftTurnMultiplier / 100.0f) * 9);
-            }
-            sendAll(leftMotor, rightMotor, LED_STATE);
+        float rightTurnMultiplier;
+        if (global_turn <= 0) {
+            rightTurnMultiplier = 100.0f;
+        } else {
+            rightTurnMultiplier = (-global_turn * 2) + 100;
+        }
+        rightMotor = (int) ((global_power / 100.0f) * (rightTurnMultiplier / 100.0f) * 9);
+
+        float leftTurnMultiplier;
+        if (global_turn >= 0) {
+            leftTurnMultiplier = 100.0f;
+        } else {
+            leftTurnMultiplier = global_turn * 2 + 100;
+        }
+        leftMotor = (int) ((global_power / 100.0f) * (leftTurnMultiplier / 100.0f) * 9);
+
+        if (leftMotor != 0 || rightMotor != 0) {
+            braked = false;
+            brakeView.setImageResource(R.mipmap.brake_button);
         }
 
-        LED_STATE_CHANGE = false;
-        MOTOR_STATE_CHANGE = false;
+        if (((SystemClock.uptimeMillis() - timeSinceLastSend) > 200) || force) {
+            timeSinceLastSend = SystemClock.uptimeMillis();
+            sendAll(leftMotor, rightMotor, braked);
+        }
 
         turnText.setText(global_turn + "%");
         powerText.setText(global_power + "%");
     }
 
-    private void brakeVehicle() {
-        global_turn = 0;
-        global_power = 0;
-        LED_STATE = true;
-        braked = true;
-    }
-
-    private void decrementTurn() {
-        global_turn-=2;
-        if (global_turn < -100){
-            global_turn = -100;
+    public void brakeVehicle(View view) {
+        if (safeMode){
+            sendBT("B");
+        } else {
+            global_turn = 0;
+            global_power = 0;
+            braked = true;
+            brakeView.setImageResource(R.mipmap.brake_pressed);
+            sendAndDisplay(true);
         }
     }
 
-    private void incrementTurn() {
-        global_turn+=2;
-        if (global_turn > 100){
-            global_turn = 100;
+    public void decrementTurn(View view) {
+        if (safeMode){
+            sendBT("<");
+        } else {
+            global_turn -= 2;
+            if (global_turn < -100) {
+                global_turn = -100;
+            }
+            sendAndDisplay(true);
         }
     }
 
-    private void decrementSpeed() {
-        global_power-=2;
-        if (global_power<-100){
-            global_power = -100;
+    public void incrementTurn(View view) {
+        if (safeMode){
+            sendBT(">");
+        } else {
+            global_turn += 2;
+            if (global_turn > 100) {
+                global_turn = 100;
+            }
+            sendAndDisplay(true);
         }
     }
 
-    private void incrementSpeed() {
-        global_power+=2;
-        if (global_power>100){
-            global_power=100;
+    public void decrementSpeed(View view) {
+        if (safeMode){
+            sendBT("G");
+        } else {
+            global_power -= 2;
+            if (global_power < -100) {
+                global_power = -100;
+            }
+            sendAndDisplay(true);
+        }
+    }
+
+    public void incrementSpeed(View view) {
+        if (safeMode){
+            sendBT("F");
+        } else {
+            global_power += 2;
+            if (global_power > 100) {
+                global_power = 100;
+            }
+            sendAndDisplay(true);
         }
     }
 
@@ -242,6 +250,7 @@ public class UI_Activity extends AppCompatActivity {
                     boolean success = connectBluetooth(bt.getAddress(), bt.getName());
                     if(success) {
                         Toast.makeText(getApplicationContext(), "Connected to Arduino", Toast.LENGTH_SHORT).show();
+                        bluetoothView.setImageResource(R.mipmap.bluetooth_on);
                     } else {
                         Toast.makeText(getApplicationContext(), "Arduino found, Connection failed", Toast.LENGTH_LONG).show();
                     }
@@ -255,20 +264,14 @@ public class UI_Activity extends AppCompatActivity {
         }
     }
 
-    public void setTemperature(int temp){
-        temperature = temp;
-    }
-
-    private boolean connectBluetooth(String address, String name)                           {
+    private boolean connectBluetooth(String address, String name){
         try {
             BluetoothDevice dispositivo = myBluetooth.getRemoteDevice(address);
             btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);
             BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
             btSocket.connect();
             bluetoothConnected = true;
-            //bluetooth_listener = new Bluetooth_Listener(btSocket);
             bluetooth_sender = new Bluetooth_Sender(btSocket);
-            //bluetooth_listener.start();
             return true;
         } catch (Exception e){
             e.printStackTrace();
@@ -276,22 +279,17 @@ public class UI_Activity extends AppCompatActivity {
         }
     }
 
-    private void sendMotor(String name, float strength){
-        int strength_int = (int) (strength*100);
-        String int_formatted = String.format("%03d", strength_int);
-        if (strength_int>=0){
-            sendBT("M" + name +"+" + int_formatted + ">");
-        } else {
-            sendBT("M" + name + int_formatted + ">");
-        }
-    }
-
     private void sendAll(int leftStrength, int rightStrength, boolean led_state){
         String message = decimalFormat.format(leftStrength) + "" + decimalFormat.format(rightStrength);
-        if(led_state){
-            message+="1>";
+        if (LED_STATE) {
+                message += "1";
         } else {
-            message+="0>";
+                message += "0";
+        }
+        if (braked) {
+            message += "1>";
+        } else {
+            message += "0>";
         }
         sendBT(message);
     }
@@ -301,21 +299,42 @@ public class UI_Activity extends AppCompatActivity {
             bluetooth_sender.setMessage(message);
             bluetooth_sender.run();
         } else {
-            Toast.makeText(getApplicationContext(), "No Bluetooth Connection", Toast.LENGTH_SHORT).show();
+            Log.d("BT", "No connection");
         }
     }
 
     public void switchSafeMode(View view){
         safeMode = !safeMode;
         if (safeMode){
+            safeView.setImageResource(R.mipmap.safe_on);
             sendBT("_");
         } else {
-            sendBT("-");
+            safeView.setImageResource(R.mipmap.safe_off);
+            sendBT("=");
         }
     }
 
     public void cycleGUI(View view){
         Intent intent = new Intent(this, Motor_Direct.class);
         startActivity(intent);
+    }
+
+    public void toggleLED(View view){
+        ImageView thisView = (ImageView) view;
+        LED_STATE = !LED_STATE;
+        if (LED_STATE){
+            if (safeMode){
+                sendBT("O");
+            }
+            thisView.setImageResource(R.mipmap.headlights_pressed);
+        } else {
+            if (safeMode){
+                sendBT("P");
+            }
+            thisView.setImageResource(R.mipmap.headlights_normal);
+        }
+        if (!safeMode) {
+            sendAndDisplay(true);
+        }
     }
 }
