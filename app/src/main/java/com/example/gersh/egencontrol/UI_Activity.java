@@ -31,6 +31,7 @@ public class UI_Activity extends AppCompatActivity {
     private DecimalFormat decimalFormat = new DecimalFormat("+#;-#");
     int global_power, global_turn;
     int leftMotor = 0, rightMotor = 0;
+    int reverseValue = 1;
     boolean braked = false;
 
     TextView powerText, turnText;
@@ -127,21 +128,21 @@ public class UI_Activity extends AppCompatActivity {
     private void sendAndDisplay(boolean force) {
         //Log.d("UI", "Time since last send: " + (SystemClock.uptimeMillis() - timeSinceLastSend));
 
-        float rightTurnMultiplier;
-        if (global_turn <= 0) {
-            rightTurnMultiplier = 100.0f;
-        } else {
-            rightTurnMultiplier = (-global_turn * 2) + 100;
-        }
-        rightMotor = (int) ((global_power / 100.0f) * (rightTurnMultiplier / 100.0f) * 9);
-
         float leftTurnMultiplier;
-        if (global_turn >= 0) {
+        if (global_turn <= 0) {
             leftTurnMultiplier = 100.0f;
         } else {
-            leftTurnMultiplier = global_turn * 2 + 100;
+            leftTurnMultiplier = (-global_turn * 2) + 100;
         }
         leftMotor = (int) ((global_power / 100.0f) * (leftTurnMultiplier / 100.0f) * 9);
+
+        float rightTurnMultiplier;
+        if (global_turn >= 0) {
+            rightTurnMultiplier = 100.0f;
+        } else {
+            rightTurnMultiplier = global_turn * 2 + 100;
+        }
+        rightMotor = (int) ((global_power / 100.0f) * (rightTurnMultiplier / 100.0f) * 9);
 
         if (leftMotor != 0 || rightMotor != 0) {
             braked = false;
@@ -150,7 +151,7 @@ public class UI_Activity extends AppCompatActivity {
 
         if (((SystemClock.uptimeMillis() - timeSinceLastSend) > 200) || force) {
             timeSinceLastSend = SystemClock.uptimeMillis();
-            sendAll(leftMotor, rightMotor);
+            sendAll(leftMotor * reverseValue, rightMotor * reverseValue);
         }
 
         turnText.setText(global_turn + "%");
@@ -332,6 +333,20 @@ public class UI_Activity extends AppCompatActivity {
                 sendBT("P");
             }
             thisView.setImageResource(R.mipmap.headlights_normal);
+        }
+        if (!safeMode) {
+            sendAndDisplay(true);
+        }
+    }
+
+    public void reverseDirection(View view) {
+        ImageView thisView = (ImageView) view;
+        if (reverseValue == 1){
+            reverseValue = -1;
+            thisView.setImageResource(R.mipmap.reverse_on);
+        } else {
+            reverseValue = 1;
+            thisView.setImageResource(R.mipmap.reverse_off);
         }
         if (!safeMode) {
             sendAndDisplay(true);
