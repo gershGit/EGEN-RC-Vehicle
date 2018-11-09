@@ -2,8 +2,8 @@
 
 #define HEADLIGHTS 8
 #define BRAKELIGHTS 9
-#define LEFT_BLINKER 12
-#define RIGHT_BLINKER 13
+#define LEFT_BLINKER 6
+#define RIGHT_BLINKER 7
 
 Servo servoLeft;
 Servo servoRight;
@@ -103,31 +103,45 @@ void handleSafe(char command){
   //  O --> Headlights On
   //  P --> Headlights Off
   if (command == 'F') {
+    lastLeft = 9;
+    lastRight = 9;
     servoLeft.writeMicroseconds(1000);
     servoRight.writeMicroseconds(2000);
     Serial.println("Forward");
   } else if (command == 'G') {
+    lastLeft = -9;
+    lastRight =-9;
     servoLeft.writeMicroseconds(2000);
     servoRight.writeMicroseconds(1000);
     Serial.println("Backwards");
   } else if (command == '>') {
+    lastLeft = 9;
+    lastRight = -9;
     servoLeft.writeMicroseconds(1000);
     servoRight.writeMicroseconds(1000);
     Serial.println("Right");
   } else if (command == '<') {
+    lastLeft = -9;
+    lastRight = 9;
     servoLeft.writeMicroseconds(2000);
     servoRight.writeMicroseconds(2000);
     Serial.println("Left");
-  } else if (command == 'B'){
-    servoLeft.writeMicroseconds(1500);
-    servoRight.writeMicroseconds(1500);
-    Serial.println("Brake");
   } else if (command == 'O') {
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(HEADLIGHTS, HIGH);
     Serial.println("Headlights On");
   } else if (command == 'P') {
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(HEADLIGHTS, LOW);
     Serial.println("Headlights Off");
+  }
+  if (command == 'B'){
+    lastLeft = 0;
+    lastRight = 0;
+    servoLeft.writeMicroseconds(1500);
+    servoRight.writeMicroseconds(1500);
+    digitalWrite(BRAKELIGHTS, HIGH);
+    Serial.println("Brake");
+  } else {
+    digitalWrite(BRAKELIGHTS, LOW);
   }
 }
 
