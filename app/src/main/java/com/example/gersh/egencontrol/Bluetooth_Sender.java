@@ -7,7 +7,7 @@ public class Bluetooth_Sender implements Runnable {
     private BluetoothSocket btSocket;
     private String message;
 
-    public Bluetooth_Sender(BluetoothSocket new_btSocket){
+    Bluetooth_Sender(BluetoothSocket new_btSocket){
         btSocket = new_btSocket;
     }
 
@@ -26,6 +26,7 @@ public class Bluetooth_Sender implements Runnable {
             try {
                 btSocket.getOutputStream().write(message.getBytes());
             } catch (Exception e){
+                Log.d("BT", "Bluetooth Sending Failed");
                 e.printStackTrace();
             }
         }
