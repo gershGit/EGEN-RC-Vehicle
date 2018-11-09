@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +35,7 @@ public class Motor_Direct extends AppCompatActivity {
     boolean braked = false;
 
     TextView rightText, leftText;
+    ImageView brakeView, safeView, bluetoothView, turnView, speedView;
     boolean LED_STATE = false;
 
     long timeSinceLastSend;
@@ -44,6 +46,8 @@ public class Motor_Direct extends AppCompatActivity {
         setContentView(R.layout.activity_motor__direct);
         rightText = findViewById(R.id.rightMotorText);
         leftText = findViewById(R.id.leftMotorText);
+        brakeView = findViewById(R.id.brake_button);
+        bluetoothView = findViewById(R.id.bluetoothButton);
 
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
         if  (myBluetooth == null){
@@ -86,7 +90,7 @@ public class Motor_Direct extends AppCompatActivity {
         }
 
 
-        sendAndDisplay();
+        sendAndDisplay(false);
 
         return super.onTouchEvent(event);
     }
@@ -121,24 +125,30 @@ public class Motor_Direct extends AppCompatActivity {
         leftPercent = (int) power;
     }
 
-    private void sendAndDisplay() {
-        if (SystemClock.uptimeMillis()-timeSinceLastSend > 100) {
+    private void sendAndDisplay(boolean force) {
+        //Log.d("UI", "Time since last send: " + (SystemClock.uptimeMillis() - timeSinceLastSend));
+
+        leftMotor = leftPercent/10;
+        if (leftMotor>9){
+            leftMotor = 9;
+        } else if (leftMotor<-9){
+            leftMotor = -9;
+        }
+        rightMotor = rightPercent/10;
+        if (rightMotor>9){
+            rightMotor = 9;
+        } else if (rightMotor<-9){
+            rightMotor = -9;
+        }
+
+        if (leftMotor != 0 || rightMotor != 0) {
+            braked = false;
+            brakeView.setImageResource(R.mipmap.brake_button);
+        }
+
+        if (((SystemClock.uptimeMillis() - timeSinceLastSend) > 200) || force) {
             timeSinceLastSend = SystemClock.uptimeMillis();
-
-            leftMotor = leftPercent/10;
-            if (leftMotor>9){
-                leftMotor = 9;
-            } else if (leftMotor<-9){
-                leftMotor = -9;
-            }
-            rightMotor = rightPercent/10;
-            if (rightMotor>9){
-                rightMotor = 9;
-            } else if (rightMotor<-9){
-                rightMotor = -9;
-            }
-
-            sendAll(leftMotor, rightMotor, LED_STATE);
+            sendAll(leftMotor, rightMotor);
         }
 
         rightText.setText(rightPercent + "%");
@@ -146,16 +156,28 @@ public class Motor_Direct extends AppCompatActivity {
     }
 
     public void brakeVehicle(View view) {
-        rightPercent = 0;
-        leftPercent = 0;
-        braked = true;
-        LED_STATE = true;
-        sendAndDisplay();
+        if (safeMode){
+            sendBT("B");
+        } else {
+            rightPercent = 0;
+            leftPercent = 0;
+            braked = true;
+            brakeView.setImageResource(R.mipmap.brake_pressed);
+            sendAndDisplay(true);
+        }
     }
 
     public void toggleLED(View view){
+        ImageView thisView = (ImageView) view;
         LED_STATE = !LED_STATE;
-        sendAndDisplay();
+        if (LED_STATE){
+            thisView.setImageResource(R.mipmap.headlights_pressed);
+        } else {
+            thisView.setImageResource(R.mipmap.headlights_normal);
+        }
+        if (!safeMode) {
+            sendAndDisplay(true);
+        }
     }
 
     public void attemptBluetooth(View view){
@@ -169,6 +191,7 @@ public class Motor_Direct extends AppCompatActivity {
                     boolean success = connectBluetooth(bt.getAddress(), bt.getName());
                     if(success) {
                         Toast.makeText(getApplicationContext(), "Connected to Arduino", Toast.LENGTH_SHORT).show();
+                        bluetoothView.setImageResource(R.mipmap.bluetooth_on);
                     } else {
                         Toast.makeText(getApplicationContext(), "Arduino found, Connection failed", Toast.LENGTH_LONG).show();
                     }
@@ -199,12 +222,17 @@ public class Motor_Direct extends AppCompatActivity {
         }
     }
 
-    private void sendAll(int leftStrength, int rightStrength, boolean led_state){
+    private void sendAll(int leftStrength, int rightStrength){
         String message = decimalFormat.format(leftStrength) + "" + decimalFormat.format(rightStrength);
-        if(led_state){
-            message+="1>";
+        if (LED_STATE) {
+            message += "1";
         } else {
-            message+="0>";
+            message += "0";
+        }
+        if (braked) {
+            message += "1>";
+        } else {
+            message += "0>";
         }
         sendBT(message);
     }
@@ -214,7 +242,7 @@ public class Motor_Direct extends AppCompatActivity {
             bluetooth_sender.setMessage(message);
             bluetooth_sender.run();
         } else {
-            Log.d("FAIL", "No bluetooth");
+            Log.d("BT", "No connection");
         }
     }
 }

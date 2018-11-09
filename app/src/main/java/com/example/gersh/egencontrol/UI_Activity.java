@@ -150,7 +150,7 @@ public class UI_Activity extends AppCompatActivity {
 
         if (((SystemClock.uptimeMillis() - timeSinceLastSend) > 200) || force) {
             timeSinceLastSend = SystemClock.uptimeMillis();
-            sendAll(leftMotor, rightMotor, braked);
+            sendAll(leftMotor, rightMotor);
         }
 
         turnText.setText(global_turn + "%");
@@ -279,7 +279,7 @@ public class UI_Activity extends AppCompatActivity {
         }
     }
 
-    private void sendAll(int leftStrength, int rightStrength, boolean led_state){
+    private void sendAll(int leftStrength, int rightStrength){
         String message = decimalFormat.format(leftStrength) + "" + decimalFormat.format(rightStrength);
         if (LED_STATE) {
                 message += "1";

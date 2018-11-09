@@ -24,7 +24,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
-        app:srcCompat="@drawable/bbutton" />
+        app:srcCompat="@mipmap/brake_button" />
 
     <ImageButton
         android:id="@+id/headlights_button"
@@ -41,7 +41,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.015"
-        app:srcCompat="@drawable/hbutton" />
+        app:srcCompat="@mipmap/headlights_normal" />
 
     <ImageView
         android:id="@+id/rightSlider"
@@ -90,14 +90,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/bluetoothImage"
-        android:onClick="attemptBluetooth"
+        android:id="@+id/bluetoothButton"
         android:layout_width="46dp"
         android:layout_height="41dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:onClick="attemptBluetooth"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/stat_sys_data_bluetooth" />
+        app:srcCompat="@drawable/bluetooth_selectable" />
 
 </android.support.constraint.ConstraintLayout>
