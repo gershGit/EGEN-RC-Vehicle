@@ -206,7 +206,7 @@ void handleCommand(char command[]){
 
 //Gets a value for the left motor based on a value in the range of -9 to 9
 int getMotorValueLeft(int baseValue){
-    int scalar = 55;
+    int scalar = 20;
     if (baseValue == 0){
       return 1500;
     } else {
@@ -216,7 +216,7 @@ int getMotorValueLeft(int baseValue){
 
 //Gets a value for the right motor based on a value in the range of -9 to 9
 int getMotorValueRight(int baseValue){
-  int scalar = 55;
+  int scalar = 20;
   if (baseValue == 0){
     return 1500;
   } else {
