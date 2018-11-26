@@ -2,8 +2,8 @@
 
 #define HEADLIGHTS 8
 #define BRAKELIGHTS 9
-#define LEFT_BLINKER 6
-#define RIGHT_BLINKER 7
+#define LEFT_BLINKER 7
+#define RIGHT_BLINKER 6
 
 Servo servoLeft;
 Servo servoRight;
@@ -117,14 +117,14 @@ void handleSafe(char command){
   } else if (command == '>') {
     lastLeft = 9;
     lastRight = -9;
-    servoLeft.writeMicroseconds(1000);
-    servoRight.writeMicroseconds(1000);
+    servoLeft.writeMicroseconds(2000);
+    servoRight.writeMicroseconds(2000);
     Serial.println("Right");
   } else if (command == '<') {
     lastLeft = -9;
     lastRight = 9;
-    servoLeft.writeMicroseconds(2000);
-    servoRight.writeMicroseconds(2000);
+    servoLeft.writeMicroseconds(1000);
+    servoRight.writeMicroseconds(1000);
     Serial.println("Left");
   } else if (command == 'O') {
     digitalWrite(HEADLIGHTS, HIGH);

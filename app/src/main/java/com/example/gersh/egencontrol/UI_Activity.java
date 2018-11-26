@@ -151,7 +151,14 @@ public class UI_Activity extends AppCompatActivity {
 
         if (((SystemClock.uptimeMillis() - timeSinceLastSend) > 200) || force) {
             timeSinceLastSend = SystemClock.uptimeMillis();
-            sendAll(leftMotor * reverseValue, rightMotor * reverseValue);
+            leftMotor *= reverseValue;
+            rightMotor *= reverseValue;
+            if (reverseValue==-1){
+                int temp = leftMotor;
+                leftMotor = rightMotor;
+                rightMotor = temp;
+            }
+            sendAll(leftMotor, rightMotor);
         }
 
         turnText.setText(global_turn + "%");
@@ -347,9 +354,6 @@ public class UI_Activity extends AppCompatActivity {
         } else {
             reverseValue = 1;
             thisView.setImageResource(R.mipmap.reverse_off);
-        }
-        if (!safeMode) {
-            sendAndDisplay(true);
         }
     }
 }
