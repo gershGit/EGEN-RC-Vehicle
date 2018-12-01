@@ -2,8 +2,8 @@
 
 #define HEADLIGHTS 8
 #define BRAKELIGHTS 9
-#define LEFT_BLINKER 6
-#define RIGHT_BLINKER 7
+#define LEFT_BLINKER 7
+#define RIGHT_BLINKER 6
 
 Servo servoLeft;
 Servo servoRight;
@@ -117,14 +117,14 @@ void handleSafe(char command){
   } else if (command == '>') {
     lastLeft = 9;
     lastRight = -9;
-    servoLeft.writeMicroseconds(1000);
-    servoRight.writeMicroseconds(1000);
+    servoLeft.writeMicroseconds(2000);
+    servoRight.writeMicroseconds(2000);
     Serial.println("Right");
   } else if (command == '<') {
     lastLeft = -9;
     lastRight = 9;
-    servoLeft.writeMicroseconds(2000);
-    servoRight.writeMicroseconds(2000);
+    servoLeft.writeMicroseconds(1000);
+    servoRight.writeMicroseconds(1000);
     Serial.println("Left");
   } else if (command == 'O') {
     digitalWrite(HEADLIGHTS, HIGH);
@@ -206,7 +206,7 @@ void handleCommand(char command[]){
 
 //Gets a value for the left motor based on a value in the range of -9 to 9
 int getMotorValueLeft(int baseValue){
-    int scalar = 55;
+    int scalar = 20;
     if (baseValue == 0){
       return 1500;
     } else {
@@ -216,7 +216,7 @@ int getMotorValueLeft(int baseValue){
 
 //Gets a value for the right motor based on a value in the range of -9 to 9
 int getMotorValueRight(int baseValue){
-  int scalar = 55;
+  int scalar = 20;
   if (baseValue == 0){
     return 1500;
   } else {
