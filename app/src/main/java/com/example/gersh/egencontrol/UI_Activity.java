@@ -6,7 +6,6 @@
 package com.example.gersh.egencontrol;
 
 //Imports
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -33,7 +32,6 @@ public class UI_Activity extends AppCompatActivity {
     private Bluetooth_Sender bluetooth_sender;
     private BluetoothAdapter myBluetooth = null;
     private BluetoothSocket btSocket = null;
-    private boolean bluetoothConnected = false;
     private boolean safeMode = false;
 
     //Instance variables for command calculation and storing
@@ -191,8 +189,10 @@ public class UI_Activity extends AppCompatActivity {
         }
 
         //Set the text on the Android to the new values as percents
-        turnText.setText(global_turn + "%");
-        powerText.setText(global_power + "%");
+        String turn = global_turn + "%";
+        String power = global_power + "%";
+        turnText.setText(turn);
+        powerText.setText(power);
     }
 
     //Function to immediately brake the vehicle
@@ -304,7 +304,7 @@ public class UI_Activity extends AppCompatActivity {
                 //Compare the name against the model we are looking for
                 if (bt.getName().contains("HC-05")) {
                     found = true;
-                    boolean success = connectBluetooth(bt.getAddress(), bt.getName()); //Call the connect function on that address
+                    boolean success = connectBluetooth(bt.getAddress()); //Call the connect function on that address
                     //Display whether or not the connection attempt was successful
                     if(success) {
                         Toast.makeText(getApplicationContext(), "Connected to Arduino", Toast.LENGTH_SHORT).show();
@@ -324,14 +324,13 @@ public class UI_Activity extends AppCompatActivity {
     }
 
     //Attempts a connection to a paired bluetooth device
-    private boolean connectBluetooth(String address, String name){
+    private boolean connectBluetooth(String address){
         try {
             //Try connecting using the default adapter and UUID
             BluetoothDevice dispositivo = myBluetooth.getRemoteDevice(address);
             btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);
             BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
             btSocket.connect();
-            bluetoothConnected = true;
             bluetooth_sender = new Bluetooth_Sender(btSocket);
             return true;
         } catch (Exception e){
