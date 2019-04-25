@@ -1,6 +1,6 @@
 # Remote Control Vehicle Using an Android Device and Arduino
-Software by: Noah Gershmel
-Hardware by: JT Blackstad, Douglas Knudsen, Elif Ilknur
+  Software by: Noah Gershmel
+  Hardware by: JT Blackstad, Douglas Knudsen, Elif Ilknur
 
 # Project Description
 * A remote control Android application that communicates with an Arduino using Bluetooth. 
