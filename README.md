@@ -1,5 +1,6 @@
 # Remote Control Vehicle Using an Android Device and Arduino
   Software by: Noah Gershmel
+  
   Hardware by: JT Blackstad, Douglas Knudsen, Elif Ilknur
 
 # Project Description
